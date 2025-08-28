@@ -1,19 +1,19 @@
-import React, { useState } from "react";
+import React from "react";
 import { StyleSheet, Text } from "react-native";
 
 export default function Chords({
   toneProp,
-  harmonicFieldProp,
+  degreeProp,
 }: {
   toneProp: any;
-  harmonicFieldProp: any;
+  degreeProp: any;
 }) {
-  console.log(toneProp);
-  const [chords, setChords] = useState([]);
-  const [tone, setTone] = useState("C");
-  const [harmonicField, setHarmonicField] = useState("Major");
-
-  return <Text style={styles.chord}>{toneProp}</Text>;
+  return (
+    <Text style={styles.chord}>
+      {degreeProp}
+      {toneProp}
+    </Text>
+  );
 }
 
 const styles = StyleSheet.create({

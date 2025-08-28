@@ -1,12 +1,19 @@
+import { harmonicFields } from "@/constants/harmonicField";
+import { useTone } from "@/context/ToneContext";
 import React, { useState } from "react";
 import { Dimensions, StyleSheet, Text, View } from "react-native";
 import Draggable from "react-native-draggable";
-import Chords from "./Chords";
 
-export default function DragDrop() {
+export default function DragDrop({
+  onChordDrop,
+}: {
+  onChordDrop?: (chord: string, x: number, y: number) => void;
+}) {
   // Obtém as dimensões da tela para definir limites
   const windowWidth = Dimensions.get("window").width;
   const windowHeight = Dimensions.get("window").height;
+
+  const { tone } = useTone();
 
   // Estado para armazenar as dimensões da área de arrastar
   const [dragAreaLayout, setDragAreaLayout] = useState({
@@ -14,13 +21,16 @@ export default function DragDrop() {
     height: 0,
   });
 
+  // Estado para forçar re-render dos acordes
+  const [key, setKey] = useState(0);
+
   // Definindo acordes disponíveis
-  const availableChords = ["C", "D", "E", "F", "G", "A", "B"];
+  const availableChords = harmonicFields[tone] || [];
 
   // Valores constantes para tamanho dos acordes
-  const CHORD_WIDTH = 40; // Reduzido para tornar os acordes menores
-  const CHORD_HEIGHT = 30; // Reduzido para tornar os acordes menores
-  const CHORD_MARGIN = 10; // Espaçamento entre acordes
+  const CHORD_WIDTH = 40;
+  const CHORD_HEIGHT = 30;
+  const CHORD_MARGIN = 10;
 
   return (
     <View style={styles.container} pointerEvents="box-none">
@@ -36,44 +46,29 @@ export default function DragDrop() {
         </Text>
 
         <View style={styles.chordsRow}>
-          {dragAreaLayout.width > 0 && // Só renderiza após conhecer as dimensões
-            availableChords.map((tone, index) => {
-              // Configurações para melhor centralização
+          {dragAreaLayout.width > 0 &&
+            availableChords.map(({ chord, degree }, index) => {
+              // Usar key para forçar re-render
               const totalChords = availableChords.length;
-
-              // Determina quantos acordes por linha baseado no espaço disponível
-              const availableWidth = dragAreaLayout.width - 20; // Descontando padding
+              const availableWidth = dragAreaLayout.width - 20;
               const itemsPerRow = Math.min(
                 Math.floor(availableWidth / (CHORD_WIDTH + CHORD_MARGIN * 2)),
                 totalChords
               );
-
-              // Calcula o número de linhas necessárias
               const rowCount = Math.ceil(totalChords / itemsPerRow);
-
-              // Calcula a largura total que os acordes ocuparão em uma linha
               const totalRowWidth =
                 itemsPerRow * (CHORD_WIDTH + CHORD_MARGIN * 2);
-
-              // Centraliza na linha
               const leftPadding = (availableWidth - totalRowWidth) / 2 + 10;
-
-              // Calcula a linha e coluna do acorde atual
               const row = Math.floor(index / itemsPerRow);
               const col = index % itemsPerRow;
-
-              // Calcula posição centralizada para cada acorde
               const x =
                 leftPadding +
                 col * (CHORD_WIDTH + CHORD_MARGIN * 2) +
                 CHORD_MARGIN;
-
-              // Centraliza verticalmente no espaço disponível
-              const availableHeight = 120; // altura da chordsRow
+              const availableHeight = 120;
               const totalContentHeight =
                 rowCount * (CHORD_HEIGHT + CHORD_MARGIN * 2);
               const topPadding = (availableHeight - totalContentHeight) / 2;
-
               const y =
                 topPadding +
                 row * (CHORD_HEIGHT + CHORD_MARGIN * 2) +
@@ -82,24 +77,34 @@ export default function DragDrop() {
 
               return (
                 <Draggable
-                  key={tone}
+                  key={`${chord}-${index}-${key}`}
                   x={x}
                   y={y}
-                  renderSize={40} // Tamanho reduzido do renderSize
+                  renderSize={40}
                   renderColor="transparent"
                   isCircle={false}
                   onDragRelease={(e, gestureState) => {
-                    console.log("Acorde arrastado:", tone);
+                    if (onChordDrop) {
+                      // Calcula a posição real considerando o scroll e o layout
+                      const realX = e.nativeEvent.pageX;
+                      const realY = e.nativeEvent.pageY;
+                      onChordDrop(chord, realX, realY);
+                      // Força re-render para resetar posição
+                      setKey((prev) => prev + 1);
+                    }
                   }}
+                  z={9999}
+                  shouldReverse={false}
                   onDrag={() => console.log("start drag")}
                   onRelease={() => console.log("release drag")}
                   onPressIn={() => console.log("press in")}
                   onPressOut={() => console.log("press out")}
-                  z={9999}
-                  shouldReverse={false}
                 >
-                  <View style={styles.chordContainer}>
-                    <Chords toneProp={tone} harmonicFieldProp={"MAJOR"} />
+                  <View style={styles.chord}>
+                    <Text style={styles.degreeText}>{degree}</Text>
+                    <View style={styles.chordContainer}>
+                      <Text style={styles.chordText}>{chord}</Text>
+                    </View>
                   </View>
                 </Draggable>
               );
@@ -118,7 +123,7 @@ const styles = StyleSheet.create({
   },
   dragArea: {
     width: "100%",
-    minHeight: 160, // Reduzido de 180 para 160
+    minHeight: 160,
     backgroundColor: "#e8f4ff",
     borderRadius: 8,
     borderWidth: 1,
@@ -137,12 +142,16 @@ const styles = StyleSheet.create({
   instruction: {
     fontSize: 14,
     color: "#666",
-    marginBottom: -8, // Reduzido de 10 para 5
+    marginBottom: -8,
     textAlign: "center",
   },
+  chord: {
+    alignItems: "center",
+    justifyContent: "center",
+  },
   chordContainer: {
-    minWidth: 40, // Reduzido de 45 para 40
-    minHeight: 20, // Reduzido de 35 para 30
+    minWidth: 40,
+    minHeight: 20,
     backgroundColor: "#ffffff",
     justifyContent: "center",
     alignItems: "center",
@@ -153,9 +162,18 @@ const styles = StyleSheet.create({
     shadowRadius: 2.22,
     elevation: 10,
     zIndex: 9999,
-    padding: 4, // Reduzido de 6 para 4
+    padding: 4,
     borderWidth: 1,
     borderColor: "#e0e0e0",
-    position: "relative",
+  },
+  degreeText: {
+    fontSize: 12,
+    color: "#666",
+    marginBottom: 2,
+  },
+  chordText: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#333",
   },
 });

@@ -1,13 +1,50 @@
-import React, { useState } from "react";
-import { StyleSheet, Text, TextInput, View } from "react-native";
+import React, { useRef, useState } from "react";
+import {
+  LayoutRectangle,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from "react-native";
+import ChordTag from "./ChordTag";
 
-export default function TextEditor() {
-  const [lyrics, setLyrics] = useState("");
+type TextEditorProps = {
+  letra?: string;
+  chords?: PlacedChord[];
+  onChordPlaced?: (chord: PlacedChord) => void;
+};
+
+type PlacedChord = {
+  id: string;
+  chord: string;
+  x: number;
+  y: number;
+};
+
+export default function TextEditor({
+  letra,
+  chords = [],
+  onChordPlaced,
+}: TextEditorProps) {
+  const [lyrics, setLyrics] = useState(letra || "");
+  const editorPosition = useRef<LayoutRectangle>({
+    x: 0,
+    y: 0,
+    width: 0,
+    height: 0,
+  });
 
   return (
     <View style={styles.container}>
       <Text style={styles.label}>Letra da Música</Text>
-      <View style={styles.editorBox}>
+      <View
+        style={styles.editorBox}
+        onLayout={(event) => {
+          const { x, y, width, height } = event.nativeEvent.layout;
+          // Salvar a posição do editor para cálculos posteriores
+          editorPosition.current = { x, y, width, height };
+        }}
+      >
         <TextInput
           style={styles.textInput}
           multiline
@@ -16,10 +53,16 @@ export default function TextEditor() {
           onChangeText={setLyrics}
           textAlignVertical="top"
         />
+        {/* Renderiza os acordes posicionados */}
+        {chords.map((chord) => (
+          <ChordTag
+            key={chord.id}
+            chord={chord.chord}
+            position={{ x: chord.x, y: chord.y }}
+            onRemove={() => console.log("Remove chord:", chord.id)}
+          />
+        ))}
       </View>
-      <Text style={styles.hint}>
-        Arraste acordes para cima do texto para posicioná-los na sua música
-      </Text>
     </View>
   );
 }
@@ -40,6 +83,7 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     backgroundColor: "#fff",
     minHeight: 200,
+    position: "relative", // Importante para posicionamento absoluto dos acordes
   },
   textInput: {
     padding: 12,

@@ -1,16 +1,17 @@
 // ...existing code...
+import { useTone } from "@/context/ToneContext";
 import { Picker } from "@react-native-picker/picker";
 import React, { useState } from "react";
 import { Platform, StyleSheet, Text, View } from "react-native";
 
 export default function ChoseTone() {
   const [selectedTone, setSelectedTone] = useState("C");
-
+  const { tone, setTone } = useTone();
   return (
     <View style={styles.wrapper}>
       <Picker
-        selectedValue={selectedTone}
-        onValueChange={(itemValue: string) => setSelectedTone(itemValue)}
+        selectedValue={tone}
+        onValueChange={(itemValue) => setTone(itemValue)}
         style={styles.picker}
         dropdownIconColor="#2c3e50" // Android
         mode="dropdown"
@@ -22,8 +23,8 @@ export default function ChoseTone() {
         <Picker.Item label="G" value="G" />
         <Picker.Item label="A" value="A" />
         <Picker.Item label="B" value="B" />
-        <Picker.Item label="Am" value="Am" />
-        <Picker.Item label="Bm" value="Bm" />
+        {/* <Picker.Item label="Am" value="Am" />
+        <Picker.Item label="Bm" value="Bm" /> */}
       </Picker>
       {Platform.OS !== "android" && (
         <Text style={styles.customArrow} pointerEvents="none">

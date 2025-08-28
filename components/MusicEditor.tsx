@@ -1,48 +1,92 @@
+import { ToneProvider } from "@/context/ToneContext";
 import { LinearGradient } from "expo-linear-gradient";
-import React from "react";
+import React, { useRef, useState } from "react";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 import ChoseTone from "./ChoseTone";
 import DragDrop from "./DragDrop";
 import TextEditor from "./TextEditor";
 
-export default function MusicEditor() {
-  return (
-    <ScrollView
-      style={styles.scrollContainer}
-      contentContainerStyle={styles.contentContainer}
-      nestedScrollEnabled={true}
-      scrollEventThrottle={16}
-      showsVerticalScrollIndicator={true}
-    >
-      <LinearGradient
-        colors={["#255b80ff", "#3498db", "#48a6e8"]}
-        style={styles.header}
-      >
-        <Text style={styles.title}>Editor de Música</Text>
-      </LinearGradient>
+type MusicEditorProps = {
+  letra?: string;
+};
 
-      <View style={styles.editorContainer}>
-        {/* Escolha de Tom */}
-        <View style={styles.toneSelectorContainer}>
-          <Text style={styles.toneLabel}>Tom:</Text>
-          <View style={styles.toneSelectWrapper}>
-            <ChoseTone />
+type PlacedChord = {
+  id: string;
+  chord: string;
+  x: number;
+  y: number;
+};
+
+export default function MusicEditor({ letra }: MusicEditorProps) {
+  const [chords, setChords] = useState<PlacedChord[]>([]);
+  const editorSectionRef = useRef<View>(null);
+
+  const handleChordDrop = (chord: string, x: number, y: number) => {
+    console.log("Chord dropped at:", { x, y, chord });
+
+    // Mede a posição do editor para calcular a posição relativa
+    editorSectionRef.current?.measure((fx, fy, width, height, px, py) => {
+      const relativeX = x - px;
+      const relativeY = y - py;
+
+      // Adiciona o acorde na posição onde foi solto
+      setChords((prev) => [
+        ...prev,
+        {
+          id: Date.now().toString(),
+          chord,
+          x: relativeX,
+          y: relativeY,
+        },
+      ]);
+    });
+  };
+
+  return (
+    <ToneProvider>
+      <ScrollView
+        style={styles.scrollContainer}
+        contentContainerStyle={styles.contentContainer}
+        nestedScrollEnabled={true}
+        scrollEventThrottle={16}
+        showsVerticalScrollIndicator={true}
+      >
+        <LinearGradient
+          colors={["#599ecbff", "#3498db", "#1228cbff"]}
+          style={styles.header}
+        >
+          {/* <Text style={styles.title}>Editor de Música</Text> */}
+        </LinearGradient>
+
+        <View style={styles.editorContainer}>
+          {/* Escolha de Tom */}
+          <View style={styles.toneSelectorContainer}>
+            <Text style={styles.toneLabel}>Tom:</Text>
+            <View style={styles.toneSelectWrapper}>
+              <ChoseTone />
+            </View>
+          </View>
+
+          {/* Paleta de Acordes */}
+          <View style={[styles.section, styles.chordPalette]}>
+            <Text style={styles.sectionTitle}>Paleta de Acordes</Text>
+            <DragDrop onChordDrop={handleChordDrop} />
+          </View>
+
+          {/* Exibir letra da música se fornecida */}
+          <View
+            ref={editorSectionRef}
+            style={[styles.section, styles.textEditorSection]}
+          >
+            <TextEditor
+              letra={letra}
+              chords={chords}
+              onChordPlaced={(chord) => console.log("Chord placed:", chord)}
+            />
           </View>
         </View>
-
-        {/* Paleta de Acordes */}
-        <View style={[styles.section, styles.chordPalette]}>
-          <Text style={styles.sectionTitle}>Paleta de Acordes</Text>
-          <DragDrop />
-        </View>
-
-        {/* Editor de Texto */}
-        <View style={[styles.section, styles.textEditorSection]}>
-          {/* <Text style={styles.sectionTitle}>Editor de Texto</Text> */}
-          <TextEditor />
-        </View>
-      </View>
-    </ScrollView>
+      </ScrollView>
+    </ToneProvider>
   );
 }
 

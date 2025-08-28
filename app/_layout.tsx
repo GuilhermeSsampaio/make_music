@@ -6,14 +6,14 @@ export default function RootLayout() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <Stack>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        {/* <Stack.Screen
-          name="MusicEditor"
+        <Stack.Screen
+          name="composition"
           options={{
-            title: "Editor de Música", // Título da tela
+            title: "Letra da Música",
             headerStyle: { backgroundColor: "#3498db" },
             headerTintColor: "#fff",
           }}
-        /> */}
+        />
       </Stack>
     </GestureHandlerRootView>
   );

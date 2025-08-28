@@ -28,28 +28,6 @@ export default function TabLayout() {
           ),
         }}
       />
-      <Tabs.Screen
-        name="drag"
-        options={{
-          title: "drag",
-          tabBarIcon: ({ color }) => (
-            <MaterialCommunityIcons
-              name="playlist-music-outline"
-              size={24}
-              color={color}
-            />
-          ),
-        }}
-      />
-      {/* <Tabs.Screen
-      name="search"
-      options={{
-        title: "Search",
-        tabBarIcon: ({ color }) => (
-        <FontAwesome name="search" size={24} color={color} />
-        ),
-      }}
-      /> */}
     </Tabs>
   );
 }

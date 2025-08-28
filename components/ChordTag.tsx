@@ -6,12 +6,14 @@ interface ChordTagProps {
   chord: string;
   position: { x: number; y: number };
   onPositionChange?: (x: number, y: number) => void;
+  onRemove?: () => void;
 }
 
 export default function ChordTag({
   chord,
   position,
   onPositionChange,
+  onRemove,
 }: ChordTagProps) {
   return (
     <Draggable
@@ -20,9 +22,14 @@ export default function ChordTag({
       renderSize={36}
       renderColor="transparent"
       isCircle={false}
+      onDrag={() => console.log("start drag")}
+      onRelease={() => console.log("release drag")}
+      onPressIn={() => console.log("press in")}
+      onPressOut={() => console.log("press out")}
       onDragRelease={(e, gestureState) => {
         // Atualiza a posição quando o usuário reposiciona a cifra
         if (onPositionChange) {
+          // Mantém a posição relativa ao ponto onde o usuário arrastou
           onPositionChange(
             position.x + gestureState.dx,
             position.y + gestureState.dy
@@ -33,6 +40,11 @@ export default function ChordTag({
     >
       <View style={styles.chordTag}>
         <Text style={styles.chordText}>{chord}</Text>
+        {onRemove && (
+          <Text style={styles.removeButton} onPress={onRemove}>
+            ×
+          </Text>
+        )}
       </View>
     </Draggable>
   );
@@ -52,10 +64,33 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 1,
     elevation: 3,
+    flexDirection: "row",
+    position: "relative",
   },
   chordText: {
     color: "#ffffff",
     fontSize: 16,
     fontWeight: "bold",
+  },
+  removeButton: {
+    position: "absolute",
+    top: -8,
+    right: -8,
+    backgroundColor: "#ff4444",
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    justifyContent: "center",
+    alignItems: "center",
+    color: "#ffffff",
+    fontSize: 14,
+    fontWeight: "bold",
+    textAlign: "center",
+    lineHeight: 18,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 1,
+    elevation: 4,
   },
 });

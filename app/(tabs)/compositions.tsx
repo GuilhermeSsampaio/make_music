@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons"; // Ícones para botões
+import { Link } from "expo-router";
 import React, { useState } from "react";
 import {
   FlatList,
@@ -11,9 +12,24 @@ import {
 
 export default function Compositions({ navigation }: any) {
   const [compositions, setCompositions] = useState([
-    { id: "1", title: "Composição 1", version: "v1.0", duration: "3:45" },
-    { id: "2", title: "Composição 2", version: "v1.1", duration: "4:20" },
-    { id: "3", title: "Composição 3", version: "v2.0", duration: "2:58" },
+    {
+      id: "1",
+      title: "Composição 1",
+      version: "v1.0",
+      letra: "Esta é a letra da composição 1.",
+    },
+    {
+      id: "2",
+      title: "Composição 2",
+      version: "v1.1",
+      letra: "Letra da composição 2 aqui.",
+    },
+    {
+      id: "3",
+      title: "Composição 3",
+      version: "v2.0",
+      letra: "Mais uma letra de música para a composição 3.",
+    },
   ]);
 
   const handlePlay = (id: string) => {
@@ -22,10 +38,6 @@ export default function Compositions({ navigation }: any) {
 
   const handleShare = (id: string) => {
     console.log(`Sharing composition ${id}`);
-  };
-
-  const handleNavigate = (id: string) => {
-    navigation.navigate("ComposicaoDetalhes", { id });
   };
 
   return (
@@ -38,15 +50,15 @@ export default function Compositions({ navigation }: any) {
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
           <View style={styles.card}>
-            <TouchableOpacity
-              style={styles.cardContent}
-              onPress={() => handleNavigate(item.id)}
+            <Link
+              href={{ pathname: "/composition", params: { letra: item.letra } }}
+              asChild
             >
-              <Text style={styles.cardTitle}>{item.title}</Text>
-              <Text style={styles.cardVersion}>
-                {item.version} • {item.duration}
-              </Text>
-            </TouchableOpacity>
+              <TouchableOpacity style={styles.cardContent}>
+                <Text style={styles.cardTitle}>{item.title}</Text>
+                <Text style={styles.cardVersion}>{item.version}</Text>
+              </TouchableOpacity>
+            </Link>
             <View style={styles.cardActions}>
               <TouchableOpacity
                 style={styles.actionButton}
