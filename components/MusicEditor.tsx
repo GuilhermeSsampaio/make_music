@@ -1,3 +1,4 @@
+import { LinearGradient } from "expo-linear-gradient";
 import React from "react";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 import ChoseTone from "./ChoseTone";
@@ -13,15 +14,20 @@ export default function MusicEditor() {
       scrollEventThrottle={16}
       showsVerticalScrollIndicator={true}
     >
-      <View style={styles.header}>
+      <LinearGradient
+        colors={["#255b80ff", "#3498db", "#48a6e8"]}
+        style={styles.header}
+      >
         <Text style={styles.title}>Editor de Música</Text>
-      </View>
+      </LinearGradient>
 
       <View style={styles.editorContainer}>
         {/* Escolha de Tom */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Escolha de Tom</Text>
-          <ChoseTone />
+        <View style={styles.toneSelectorContainer}>
+          <Text style={styles.toneLabel}>Tom:</Text>
+          <View style={styles.toneSelectWrapper}>
+            <ChoseTone />
+          </View>
         </View>
 
         {/* Paleta de Acordes */}
@@ -32,7 +38,7 @@ export default function MusicEditor() {
 
         {/* Editor de Texto */}
         <View style={[styles.section, styles.textEditorSection]}>
-          <Text style={styles.sectionTitle}>Editor de Texto</Text>
+          {/* <Text style={styles.sectionTitle}>Editor de Texto</Text> */}
           <TextEditor />
         </View>
       </View>
@@ -50,8 +56,8 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
   },
   header: {
-    width: "100%",
-    padding: 16,
+    width: "80%",
+    alignSelf: "center",
     backgroundColor: "#3498db",
   },
   title: {
@@ -68,8 +74,8 @@ const styles = StyleSheet.create({
   section: {
     backgroundColor: "#ffffff",
     borderRadius: 8,
-    padding: 16,
-    marginBottom: 16,
+    padding: 5,
+    marginBottom: 5,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
@@ -80,6 +86,7 @@ const styles = StyleSheet.create({
   chordPalette: {
     zIndex: 5,
     elevation: 4,
+    height: 200,
   },
   textEditorSection: {
     backgroundColor: "#ffffff",
@@ -98,7 +105,52 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: "600",
-    marginBottom: 12,
+    marginBottom: 4,
     color: "#2c3e50",
+  },
+  selec_tone: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    marginBottom: 10,
+    borderStyle: "solid",
+    borderWidth: 1,
+    width: 200,
+  },
+  toneSelectorContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#ffffff",
+    borderRadius: 8,
+    padding: 6,
+    paddingLeft: 12,
+    marginBottom: 2,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+    borderStyle: "solid",
+    borderWidth: 1,
+    borderColor: "#ddd",
+    width: "auto",
+  },
+  toneLabel: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#2c3e50",
+    marginRight: 10, // antes 15
+  },
+  toneSelectWrapper: {
+    maxWidth: 120,
+    width: 120,
+    height: 40,
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: "#ccc",
+    backgroundColor: "#fff",
+    position: "relative",
+    justifyContent: "center",
+    overflow: "hidden",
   },
 });

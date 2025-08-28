@@ -124,12 +124,12 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#c0d6e9",
     borderStyle: "dashed",
-    padding: 8,
+    padding: 4,
     position: "relative",
   },
   chordsRow: {
     width: "100%",
-    height: 120,
+    height: 80,
     position: "relative",
     display: "flex",
     justifyContent: "center",
@@ -137,12 +137,12 @@ const styles = StyleSheet.create({
   instruction: {
     fontSize: 14,
     color: "#666",
-    marginBottom: 5, // Reduzido de 10 para 5
+    marginBottom: -8, // Reduzido de 10 para 5
     textAlign: "center",
   },
   chordContainer: {
     minWidth: 40, // Reduzido de 45 para 40
-    minHeight: 30, // Reduzido de 35 para 30
+    minHeight: 20, // Reduzido de 35 para 30
     backgroundColor: "#ffffff",
     justifyContent: "center",
     alignItems: "center",

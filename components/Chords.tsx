@@ -21,6 +21,6 @@ const styles = StyleSheet.create({
     fontSize: 20, // Reduzido de 24 para 20
     fontWeight: "bold",
     color: "#333",
-    margin: 3, // Reduzido de 5 para 3
+    margin: 2,
   },
 });
