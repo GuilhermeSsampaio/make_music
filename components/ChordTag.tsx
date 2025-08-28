@@ -4,17 +4,40 @@ import Draggable from "react-native-draggable";
 
 interface ChordTagProps {
   chord: string;
-  position: { x: number; y: number };
+  position?: { x: number; y: number };
+  draggable?: boolean;
   onPositionChange?: (x: number, y: number) => void;
   onRemove?: () => void;
 }
 
 export default function ChordTag({
   chord,
-  position,
+  position = { x: 0, y: 0 },
+  draggable = false,
   onPositionChange,
   onRemove,
 }: ChordTagProps) {
+  if (!draggable) {
+    return (
+      <View
+        style={[
+          styles.chordTag,
+          position && {
+            position: "absolute",
+            left: position.x,
+            top: position.y,
+          },
+        ]}
+      >
+        <Text style={styles.chordText}>{chord}</Text>
+        {onRemove && (
+          <Text style={styles.removeButton} onPress={onRemove}>
+            ×
+          </Text>
+        )}
+      </View>
+    );
+  }
   return (
     <Draggable
       x={position.x}
@@ -22,21 +45,15 @@ export default function ChordTag({
       renderSize={36}
       renderColor="transparent"
       isCircle={false}
-      onDrag={() => console.log("start drag")}
-      onRelease={() => console.log("release drag")}
-      onPressIn={() => console.log("press in")}
-      onPressOut={() => console.log("press out")}
-      onDragRelease={(e, gestureState) => {
-        // Atualiza a posição quando o usuário reposiciona a cifra
+      onDragRelease={(e: any, gestureState: any) => {
         if (onPositionChange) {
-          // Mantém a posição relativa ao ponto onde o usuário arrastou
           onPositionChange(
             position.x + gestureState.dx,
             position.y + gestureState.dy
           );
         }
       }}
-      z={800} // Alto, mas não tão alto quanto os acordes originais
+      z={800}
     >
       <View style={styles.chordTag}>
         <Text style={styles.chordText}>{chord}</Text>

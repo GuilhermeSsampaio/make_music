@@ -1,17 +1,18 @@
 import React, { useRef, useState } from "react";
-import {
-  LayoutRectangle,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from "react-native";
-import ChordTag from "./ChordTag";
+import { StyleSheet, Text, TextInput, View } from "react-native";
 
 type TextEditorProps = {
   letra?: string;
   chords?: PlacedChord[];
   onChordPlaced?: (chord: PlacedChord) => void;
+  onEditorBoxLayout?: (box: {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+    paddingLeft: number;
+    paddingTop: number;
+  }) => void;
 };
 
 type PlacedChord = {
@@ -25,25 +26,36 @@ export default function TextEditor({
   letra,
   chords = [],
   onChordPlaced,
+  onEditorBoxLayout,
 }: TextEditorProps) {
   const [lyrics, setLyrics] = useState(letra || "");
-  const editorPosition = useRef<LayoutRectangle>({
-    x: 0,
-    y: 0,
-    width: 0,
-    height: 0,
-  });
+  const editorBoxRef = useRef<View | null>(null);
+
+  // Ao montar / layout, mede a posição absoluta do box onde os acordes vivem
+  const handleEditorBoxLayout = () => {
+    if (editorBoxRef.current) {
+      // measureInWindow dá coordenadas absolutas (pageX/pageY)
+      editorBoxRef.current.measureInWindow((x, y, width, height) => {
+        onEditorBoxLayout?.({
+          x,
+          y,
+          width,
+          height,
+          // Padding usado no style.textInput
+          paddingLeft: 12,
+          paddingTop: 12,
+        });
+      });
+    }
+  };
 
   return (
     <View style={styles.container}>
       <Text style={styles.label}>Letra da Música</Text>
       <View
+        ref={editorBoxRef}
         style={styles.editorBox}
-        onLayout={(event) => {
-          const { x, y, width, height } = event.nativeEvent.layout;
-          // Salvar a posição do editor para cálculos posteriores
-          editorPosition.current = { x, y, width, height };
-        }}
+        onLayout={handleEditorBoxLayout}
       >
         <TextInput
           style={styles.textInput}
@@ -53,15 +65,7 @@ export default function TextEditor({
           onChangeText={setLyrics}
           textAlignVertical="top"
         />
-        {/* Renderiza os acordes posicionados */}
-        {chords.map((chord) => (
-          <ChordTag
-            key={chord.id}
-            chord={chord.chord}
-            position={{ x: chord.x, y: chord.y }}
-            onRemove={() => console.log("Remove chord:", chord.id)}
-          />
-        ))}
+        {/* A renderização dos acordes é feita no MusicEditor para controle centralizado */}
       </View>
     </View>
   );

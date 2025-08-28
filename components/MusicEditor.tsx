@@ -2,6 +2,7 @@ import { ToneProvider } from "@/context/ToneContext";
 import { LinearGradient } from "expo-linear-gradient";
 import React, { useRef, useState } from "react";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
+import ChordTag from "./ChordTag";
 import ChoseTone from "./ChoseTone";
 import DragDrop from "./DragDrop";
 import TextEditor from "./TextEditor";
@@ -20,26 +21,48 @@ type PlacedChord = {
 export default function MusicEditor({ letra }: MusicEditorProps) {
   const [chords, setChords] = useState<PlacedChord[]>([]);
   const editorSectionRef = useRef<View>(null);
+  const editorBoxMetrics = useRef<{
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+    paddingLeft: number;
+    paddingTop: number;
+  } | null>(null);
 
-  const handleChordDrop = (chord: string, x: number, y: number) => {
-    console.log("Chord dropped at:", { x, y, chord });
+  const handleChordDrop = (chord: string, pageX: number, pageY: number) => {
+    const metrics = editorBoxMetrics.current;
+    if (!metrics) return;
 
-    // Mede a posição do editor para calcular a posição relativa
-    editorSectionRef.current?.measure((fx, fy, width, height, px, py) => {
-      const relativeX = x - px;
-      const relativeY = y - py;
+    // Dimensões visuais aproximadas do tag (padding + texto). Pode ajustar se mudar estilo.
+    const TAG_WIDTH = 36; // renderSize base
+    const TAG_HEIGHT = 28; // altura visual do container laranja
 
-      // Adiciona o acorde na posição onde foi solto
-      setChords((prev) => [
-        ...prev,
-        {
-          id: Date.now().toString(),
-          chord,
-          x: relativeX,
-          y: relativeY,
-        },
-      ]);
-    });
+    // Converte coordenadas absolutas (page) para relativas dentro do box de edição
+    let relX = pageX - metrics.x - TAG_WIDTH / 2; // centraliza pelo ponto de soltar
+    let relY = pageY - metrics.y - TAG_HEIGHT / 2;
+
+    // Garante que não saia da área útil (considerando padding interno do texto)
+    const minX = 0;
+    const minY = 0;
+    const maxX = metrics.width - TAG_WIDTH;
+    const maxY = metrics.height - TAG_HEIGHT;
+    relX = Math.min(Math.max(relX, minX), maxX);
+    relY = Math.min(Math.max(relY, minY), maxY);
+
+    setChords((prev) => [
+      ...prev,
+      {
+        id: Date.now().toString(),
+        chord,
+        x: relX,
+        y: relY,
+      },
+    ]);
+  };
+
+  const handleRemoveChord = (id: string) => {
+    setChords((prev) => prev.filter((c) => c.id !== id));
   };
 
   return (
@@ -81,8 +104,18 @@ export default function MusicEditor({ letra }: MusicEditorProps) {
             <TextEditor
               letra={letra}
               chords={chords}
-              onChordPlaced={(chord) => console.log("Chord placed:", chord)}
+              onEditorBoxLayout={(m) => {
+                editorBoxMetrics.current = m;
+              }}
             />
+            {chords.map((c) => (
+              <ChordTag
+                key={c.id}
+                chord={c.chord}
+                position={{ x: c.x, y: c.y }}
+                onRemove={() => handleRemoveChord(c.id)}
+              />
+            ))}
           </View>
         </View>
       </ScrollView>
