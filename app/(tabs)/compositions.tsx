@@ -12,9 +12,11 @@ import {
 
 export default function Compositions() {
   const chords = ["C", "G", "Am", "F", "D", "Em", "Bm", "E"]; // acordes disponíveis e ampliados
+
+  // Alterado: voltamos a usar coordenadas x, y para posição absoluta
   const [placedChords, setPlacedChords] = useState<
     { chord: string; x: number; y: number; id: string }[]
-  >([]); // acordes arrastados e soltos
+  >([]); // acordes colocados na letra
 
   // Lista de acordes sendo arrastados simultaneamente
   const [draggingChords, setDraggingChords] = useState<
@@ -67,11 +69,11 @@ export default function Compositions() {
         if (draggedChord) {
           draggedChord.pan.flattenOffset();
 
-          // Calcular a posição real considerando o scroll
+          // Usar a posição real onde o acorde foi solto
           const realX = gesture.moveX;
           const realY = gesture.moveY - scrollOffset.current.y;
 
-          // Quando soltar o acorde que estava arrastando
+          // Adicionar o acorde na posição exata onde foi solto
           setPlacedChords((prev) => [
             ...prev,
             {
@@ -152,40 +154,17 @@ export default function Compositions() {
         onScroll={handleScroll}
         scrollEventThrottle={16}
       >
-        {lyrics.map((line, li) => (
-          <View key={li} style={styles.line}>
-            {line.map((word, wi) => (
-              <View key={wi} style={styles.wordBox}>
-                {/* Acordes colocados acima da palavra */}
-                <View style={styles.chordContainer}>
-                  {placedChords.map((p) => {
-                    // Calcula a distância entre o acorde e esta palavra
-                    const wordPos = { x: wi * 80 + 20, y: li * 50 + 10 };
-                    const distance = Math.sqrt(
-                      Math.pow(p.x - wordPos.x, 2) +
-                        Math.pow(p.y - wordPos.y, 2)
-                    );
-
-                    // Se o acorde estiver próximo desta palavra, mostre-o acima
-                    if (distance < 60) {
-                      return (
-                        <TouchableOpacity
-                          key={p.id}
-                          onLongPress={() => removeChord(p.id)}
-                        >
-                          <Text style={styles.placedChord}>{p.chord}</Text>
-                        </TouchableOpacity>
-                      );
-                    }
-                    return null;
-                  })}
-                </View>
-
+        {lyrics.map((line, lineIndex) => (
+          <View key={lineIndex} style={styles.line}>
+            {line.map((word, wordIndex) => (
+              <View key={wordIndex} style={styles.wordBox}>
                 {/* Palavra editável */}
                 <TextInput
                   style={styles.word}
                   value={word}
-                  onChangeText={(text) => updateWord(li, wi, text)}
+                  onChangeText={(text) =>
+                    updateWord(lineIndex, wordIndex, text)
+                  }
                 />
               </View>
             ))}
@@ -193,7 +172,7 @@ export default function Compositions() {
             <TouchableOpacity
               onPress={() => {
                 const newLyrics = [...lyrics];
-                newLyrics[li].push("");
+                newLyrics[lineIndex].push("");
                 setLyrics(newLyrics);
               }}
               style={styles.addWordBtn}
@@ -202,6 +181,21 @@ export default function Compositions() {
             </TouchableOpacity>
           </View>
         ))}
+
+        {/* Acordes colocados na posição absoluta */}
+        {placedChords.map((chord) => (
+          <TouchableOpacity
+            key={chord.id}
+            style={[
+              styles.absolutePlacedChord,
+              { left: chord.x - 20, top: chord.y - 20 },
+            ]}
+            onLongPress={() => removeChord(chord.id)}
+          >
+            <Text style={styles.placedChord}>{chord.chord}</Text>
+          </TouchableOpacity>
+        ))}
+
         {/* Botão para adicionar nova linha */}
         <TouchableOpacity onPress={addNewLine} style={styles.addLineBtn}>
           <Text style={styles.addLineText}>+ Nova linha</Text>
@@ -264,27 +258,20 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingBottom: 60,
+    position: "relative", // Para posicionamento absoluto dos acordes
   },
   line: {
     flexDirection: "row",
     flexWrap: "wrap",
     marginBottom: 20,
     alignItems: "center",
+    position: "relative", // Para posicionamento dos acordes
   },
   wordBox: {
     marginRight: 12,
     marginBottom: 8,
     alignItems: "center",
-    minHeight: 60, // Garantir espaço para os acordes acima
-  },
-  chordContainer: {
-    position: "absolute",
-    top: -24,
-    left: 0,
-    right: 0,
-    flexDirection: "row",
-    justifyContent: "center",
-    flexWrap: "wrap",
+    minHeight: 40,
   },
   word: {
     fontSize: 18,
@@ -294,6 +281,10 @@ const styles = StyleSheet.create({
     borderBottomColor: "#ddd",
     padding: 4,
     textAlign: "center",
+  },
+  absolutePlacedChord: {
+    position: "absolute",
+    zIndex: 10,
   },
   placedChord: {
     fontSize: 16,
@@ -306,7 +297,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#f39c12",
     marginBottom: 2,
-    marginRight: 4,
   },
   chordsRow: {
     flexDirection: "row",
