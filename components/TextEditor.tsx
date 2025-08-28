@@ -13,6 +13,8 @@ type TextEditorProps = {
     paddingLeft: number;
     paddingTop: number;
   }) => void;
+  textInputEditable?: boolean;
+  onLyricsChange?: (text: string) => void;
 };
 
 type PlacedChord = {
@@ -27,6 +29,8 @@ export default function TextEditor({
   chords = [],
   onChordPlaced,
   onEditorBoxLayout,
+  textInputEditable = true,
+  onLyricsChange,
 }: TextEditorProps) {
   const [lyrics, setLyrics] = useState(letra || "");
   const editorBoxRef = useRef<View | null>(null);
@@ -62,8 +66,13 @@ export default function TextEditor({
           multiline
           placeholder="Digite a letra da sua música aqui..."
           value={lyrics}
-          onChangeText={setLyrics}
+          onChangeText={(t) => {
+            setLyrics(t);
+            onLyricsChange?.(t);
+          }}
           textAlignVertical="top"
+          editable={textInputEditable}
+          pointerEvents={textInputEditable ? "auto" : "none"}
         />
         {/* A renderização dos acordes é feita no MusicEditor para controle centralizado */}
       </View>

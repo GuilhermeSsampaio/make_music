@@ -1,7 +1,7 @@
 import { ToneProvider } from "@/context/ToneContext";
 import { LinearGradient } from "expo-linear-gradient";
 import React, { useRef, useState } from "react";
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { ScrollView, StyleSheet, Text, View, Pressable, Alert } from "react-native";
 import ChordTag from "./ChordTag";
 import ChoseTone from "./ChoseTone";
 import DragDrop from "./DragDrop";
@@ -20,6 +20,8 @@ type PlacedChord = {
 
 export default function MusicEditor({ letra }: MusicEditorProps) {
   const [chords, setChords] = useState<PlacedChord[]>([]);
+  const [dragging, setDragging] = useState(false);
+  const [lyrics, setLyrics] = useState<string>(letra || "");
   const editorSectionRef = useRef<View>(null);
   const editorBoxMetrics = useRef<{
     x: number;
@@ -65,6 +67,20 @@ export default function MusicEditor({ letra }: MusicEditorProps) {
     setChords((prev) => prev.filter((c) => c.id !== id));
   };
 
+  const updateChordPosition = (id: string, x: number, y: number) => {
+    setChords((prev) => prev.map((c) => (c.id === id ? { ...c, x, y } : c)));
+  };
+
+  const handleSave = () => {
+    const payload = {
+      lyrics,
+      chords: chords.map(c => ({ id: c.id, chord: c.chord, x: c.x, y: c.y })),
+      toneTimestamp: Date.now(),
+    };
+    console.log("SAVE_COMPOSITION", JSON.stringify(payload, null, 2));
+    Alert.alert("Salvo", "Composição salva localmente (console) por enquanto.");
+  };
+
   return (
     <ToneProvider>
       <ScrollView
@@ -102,17 +118,26 @@ export default function MusicEditor({ letra }: MusicEditorProps) {
             style={[styles.section, styles.textEditorSection]}
           >
             <TextEditor
-              letra={letra}
+              letra={lyrics}
               chords={chords}
+              onLyricsChange={setLyrics}
               onEditorBoxLayout={(m) => {
                 editorBoxMetrics.current = m;
               }}
+              textInputEditable={!dragging}
             />
+            <Pressable style={styles.saveButton} onPress={handleSave}>
+              <Text style={styles.saveButtonText}>Salvar</Text>
+            </Pressable>
             {chords.map((c) => (
               <ChordTag
                 key={c.id}
                 chord={c.chord}
                 position={{ x: c.x, y: c.y }}
+                draggable
+                onDragStart={() => setDragging(true)}
+                onDragEnd={() => setDragging(false)}
+                onPositionChange={(nx, ny) => updateChordPosition(c.id, nx, ny)}
                 onRemove={() => handleRemoveChord(c.id)}
               />
             ))}
@@ -230,4 +255,22 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     overflow: "hidden",
   },
+  saveButton: {
+    marginTop: 12,
+    alignSelf: 'flex-end',
+    backgroundColor: '#f47a38',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 6,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+    elevation: 4,
+  },
+  saveButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600'
+  }
 });

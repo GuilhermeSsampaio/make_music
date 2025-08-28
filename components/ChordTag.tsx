@@ -8,6 +8,8 @@ interface ChordTagProps {
   draggable?: boolean;
   onPositionChange?: (x: number, y: number) => void;
   onRemove?: () => void;
+  onDragStart?: () => void;
+  onDragEnd?: () => void;
 }
 
 export default function ChordTag({
@@ -16,6 +18,8 @@ export default function ChordTag({
   draggable = false,
   onPositionChange,
   onRemove,
+  onDragStart,
+  onDragEnd,
 }: ChordTagProps) {
   if (!draggable) {
     return (
@@ -45,6 +49,11 @@ export default function ChordTag({
       renderSize={36}
       renderColor="transparent"
       isCircle={false}
+      onDrag={() => console.log("start drag")}
+      onRelease={() => console.log("release drag")}
+      // onPressIn={() => console.log("press in")}
+      onPressOut={() => console.log("press out")}
+      onPressIn={() => onDragStart?.()}
       onDragRelease={(e: any, gestureState: any) => {
         if (onPositionChange) {
           onPositionChange(
@@ -52,6 +61,7 @@ export default function ChordTag({
             position.y + gestureState.dy
           );
         }
+        onDragEnd?.();
       }}
       z={800}
     >
