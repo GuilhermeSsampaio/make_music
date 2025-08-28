@@ -18,9 +18,9 @@ export default function Chords({
 
 const styles = StyleSheet.create({
   chord: {
-    fontSize: 30,
+    fontSize: 20, // Reduzido de 24 para 20
     fontWeight: "bold",
     color: "#333",
-    margin: 10,
+    margin: 3, // Reduzido de 5 para 3
   },
 });

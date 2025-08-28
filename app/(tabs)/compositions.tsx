@@ -35,6 +35,7 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    position: "relative", // Importante para o z-index funcionar corretamente
+    position: "relative",
+    overflow: "hidden",
   },
 });

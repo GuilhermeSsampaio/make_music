@@ -9,8 +9,9 @@ export default function MusicEditor() {
     <ScrollView
       style={styles.scrollContainer}
       contentContainerStyle={styles.contentContainer}
-      // Importante: Adicionar este prop para que eventos de toque passem para os elementos filhos
-      pointerEvents="box-none"
+      nestedScrollEnabled={true}
+      scrollEventThrottle={16}
+      showsVerticalScrollIndicator={true}
     >
       <View style={styles.header}>
         <Text style={styles.title}>Editor de Música</Text>
@@ -23,13 +24,13 @@ export default function MusicEditor() {
           <ChoseTone />
         </View>
 
-        {/* Paleta de Acordes - Agora posicionada ANTES do editor de texto */}
+        {/* Paleta de Acordes */}
         <View style={[styles.section, styles.chordPalette]}>
           <Text style={styles.sectionTitle}>Paleta de Acordes</Text>
           <DragDrop />
         </View>
 
-        {/* Editor de Texto - Agora vem DEPOIS da paleta de acordes */}
+        {/* Editor de Texto */}
         <View style={[styles.section, styles.textEditorSection]}>
           <Text style={styles.sectionTitle}>Editor de Texto</Text>
           <TextEditor />
@@ -63,7 +64,6 @@ const styles = StyleSheet.create({
     width: "100%",
     padding: 16,
     gap: 16,
-    zIndex: 1,
   },
   section: {
     backgroundColor: "#ffffff",
@@ -78,21 +78,9 @@ const styles = StyleSheet.create({
     position: "relative",
   },
   chordPalette: {
-    zIndex: 10, // Maior z-index para os acordes ficarem acima
-    elevation: 5,
+    zIndex: 5,
+    elevation: 4,
   },
-  //   textEditorSection: {
-  //     minHeight: 300,
-  //     zIndex: 1, // Menor z-index
-  //     elevation: 2,
-  //   },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: "600",
-    marginBottom: 12,
-    color: "#2c3e50",
-  },
-
   textEditorSection: {
     backgroundColor: "#ffffff",
     borderRadius: 8,
@@ -101,10 +89,16 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
-    elevation: 2, // Menor que o chordPalette
+    elevation: 3,
     width: "100%",
     minHeight: 300,
-    zIndex: 1, // Menor z-index para ficar abaixo
-    position: "relative", // Importante para o z-index funcionar
+    zIndex: 1,
+    position: "relative",
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: "600",
+    marginBottom: 12,
+    color: "#2c3e50",
   },
 });
