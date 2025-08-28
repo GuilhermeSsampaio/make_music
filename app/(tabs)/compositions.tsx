@@ -1,6 +1,7 @@
+import { useCompositions } from "@/context/CompositionsContext";
 import { Ionicons } from "@expo/vector-icons"; // Ícones para botões
 import { Link } from "expo-router";
-import React, { useState } from "react";
+import React from "react";
 import {
   FlatList,
   SafeAreaView,
@@ -10,27 +11,8 @@ import {
   View,
 } from "react-native";
 
-export default function Compositions({ navigation }: any) {
-  const [compositions, setCompositions] = useState([
-    {
-      id: "1",
-      title: "Composição 1",
-      version: "v1.0",
-      letra: "Esta é a letra da composição 1.",
-    },
-    {
-      id: "2",
-      title: "Composição 2",
-      version: "v1.1",
-      letra: "Letra da composição 2 aqui.",
-    },
-    {
-      id: "3",
-      title: "Composição 3",
-      version: "v2.0",
-      letra: "Mais uma letra de música para a composição 3.",
-    },
-  ]);
+export default function Compositions() {
+  const { compositions } = useCompositions();
 
   const handlePlay = (id: string) => {
     console.log(`Playing composition ${id}`);
@@ -51,12 +33,17 @@ export default function Compositions({ navigation }: any) {
         renderItem={({ item }) => (
           <View style={styles.card}>
             <Link
-              href={{ pathname: "/composition", params: { letra: item.letra } }}
+              href={{
+                pathname: "/composition",
+                params: { id: item.id },
+              }}
               asChild
             >
               <TouchableOpacity style={styles.cardContent}>
                 <Text style={styles.cardTitle}>{item.title}</Text>
-                <Text style={styles.cardVersion}>{item.version}</Text>
+                <Text style={styles.cardVersion}>
+                  {new Date(item.updatedAt).toLocaleDateString()}
+                </Text>
               </TouchableOpacity>
             </Link>
             <View style={styles.cardActions}>
@@ -85,6 +72,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#f8f9fa",
+    marginTop: 40,
   },
   header: {
     paddingVertical: 16,
